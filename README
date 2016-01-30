@@ -1,0 +1,32 @@
+dracut-ntfsloop: Mount image on NTFS partition
+==============================================
+
+This dracut module allows you to use a root system located inside
+a disk image on a NTFS partition, similar to how Wubi worked.
+
+## Requirements
+
+* dracut (tested with Fedora 23)
+* fuse, ntfs-3g, kpartx, losetup
+* fuse and loop kernel modules available
+
+The disk image should contain a full partition table. You'll usually create this
+by installing your linux distro of choice in qemu.
+
+## Installation
+
+* copy the `90ntfsloop` directory to `/usr/lib/dracut/modules.d`
+* regenerate your initrd using `dracut --force`
+* add to your kernel command line: `rd.ntfsloop=/PATH/TO/DEVICE:PATH/TO/IMAGE/IN/PARTITION`
+  where `/PATH/TO/DEVICE` can be like `/dev/sda1` but also `UUID=...`.
+
+You'll want to do this while your system is still running inside qemu.
+
+To boot the final system, your `/boot` partition an boot loader will need to
+be moved to a location where the BIOS/EFI can access it, e.g. a USB flash drive.
+
+## Performance
+
+Not great, because ntfs-3g is involved. Could be improved by calculating the image
+file offset on the disk and creating the loop device directly, but that is quite
+risky, especially when the image file is fragmented.
