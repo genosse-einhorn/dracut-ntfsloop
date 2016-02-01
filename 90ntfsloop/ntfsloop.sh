@@ -13,19 +13,21 @@ mount_ntfsloop() {
 
     mkdir -p "/run/initramfs/ntfsloop/$uuid/ntfs"
 
-    # mount using ntfs-3g
-    # the @ sign is so that systemd doesn't attempt to kill the ntfs-3g process
-    ( exec -a @ntfs-3g ntfs-3g "$dev" "/run/initramfs/ntfsloop/$uuid/ntfs" ) | (while read l; do warn $l; done)
+    if ! ismounted "$dev"; then
+        info "ntfsloop: Mounting $dev onto /run/initramfs/ntfsloop/$uuid/ntfs"
 
-    # create a nice symlink for the loop device
-    ln -s "/run/initramfs/ntfsloop/$uuid/ntfs/$path" "/run/initramfs/ntfsloop/$uuid/image"
+        # mount using ntfs-3g
+        # the @ sign is so that systemd doesn't attempt to kill the ntfs-3g process
+        ( exec -a @ntfs-3g ntfs-3g "$dev" "/run/initramfs/ntfsloop/$uuid/ntfs" ) | (while read l; do warn $l; done)
 
-    # create a symlink for the device path - this symlink will survive and
-    # be there for the shutdown hook, the mount point won't
-    ln -s "$dev" "/run/initramfs/ntfsloop/$uuid/device"
+        # create a symlink for the device path - this symlink will survive and
+        # be there for the shutdown hook, the mount point won't
+        ln -s "$dev" "/run/initramfs/ntfsloop/$uuid/device"
+    fi
 
     # get the loop device up
-    kpartx -afv "/run/initramfs/ntfsloop/$uuid/image" | (while read l; do warn $l; done)
+    info "ntfsloop: Creating loop device for $path"
+    kpartx -afv "/run/initramfs/ntfsloop/$uuid/ntfs/$path" | (while read l; do warn $l; done)
 
     # make sure our shutdown script runs
     need_shutdown
