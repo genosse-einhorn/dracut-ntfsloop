@@ -22,8 +22,21 @@ by installing your linux distro of choice in qemu.
 
 You'll want to do this while your system is still running inside qemu.
 
-To boot the final system, your `/boot` partition an boot loader will need to
-be moved to a location where the BIOS/EFI can access it, e.g. a USB flash drive.
+## Booting
+
+To boot the final system, your `/boot` partition will need to be accessible
+by your boot loader of choice. You can use grub2's ntfs support combined with
+its ability to access partitions on a loopback image to make this a breeze.
+
+I installed grub2 onto a flash drive (
+`grub2-install --no-floppy /dev/sdX --boot-directory=/mount/point/of/sdX`) and
+set up a config file (`grub2/grub.cfg`) similar to this:
+
+    loopback l (hd0,msdos1)/PATH/TO/DISK.img
+    configfile (l,msdos1)/grub2/grub.cfg
+
+By the way: Your disk image is still bootable in qemu, and could be made
+bootable in VirtualBox/VMWare too by constructing a suitable `vmdk` file.
 
 ## Performance
 
