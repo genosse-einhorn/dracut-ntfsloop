@@ -21,5 +21,5 @@ install() {
 }
 
 installkernel() {
-    hostonly='' instmods fuse loop
+    hostonly='' instmods ntfs fuse loop
 }
